@@ -1,0 +1,86 @@
+body {
+    font-family: "Microsoft JhengHei", sans-serif;
+    background-color: #f5f6fa;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 25px;
+    color: #333;
+    text-align: center;
+}
+
+.notice {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #81c784;
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.empty {
+    text-align: center;
+    font-style: italic;
+    color: #777;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+thead {
+    background-color: #007BFF;
+    color: white;
+}
+
+th, td {
+    padding: 12px 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+form button {
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: bold;
+    margin: 2px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+form button[name="action"][value="approve"] {
+    background-color: #4CAF50;
+    color: white;
+}
+form button[name="action"][value="approve"]:hover {
+    background-color: #388E3C;
+}
+
+form button[name="action"][value="reject"] {
+    background-color: #f44336;
+    color: white;
+}
+form button[name="action"][value="reject"]:hover {
+    background-color: #d32f2f;
+}

@@ -1,0 +1,91 @@
+/* manager_request_leave.css */
+
+.leave-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    table-layout: fixed;
+}
+
+.leave-table th,
+.leave-table td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 14px;
+    word-break: break-word;
+}
+
+.leave-table th {
+    background-color: #f4f4f4;
+}
+
+.leave-table td select,
+.leave-table td input,
+.leave-table td textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px;
+    font-size: 14px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.leave-table td textarea {
+    resize: vertical;
+    min-height: 38px;
+}
+
+.multi-form-row.alt-row {
+    background-color: #f1f5f9;
+}
+
+.button-add,
+.button-submit {
+    padding: 12px 20px;
+    font-weight: bold;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 16px;
+}
+
+.button-add {
+    background-color: #007bff;
+    margin-bottom: 20px;
+}
+
+.button-add:hover {
+    background-color: #0056b3;
+}
+
+.button-submit {
+    background-color: #28a745;
+}
+
+.button-submit:hover {
+    background-color: #218838;
+}
+
+.description {
+    color: #555;
+    font-size: 15px;
+    margin-bottom: 15px;
+}
+
+@media (max-width: 768px) {
+    .leave-table td select,
+    .leave-table td input,
+    .leave-table td textarea {
+        font-size: 12px;
+    }
+
+    .button-add,
+    .button-submit {
+        font-size: 14px;
+        padding: 10px 15px;
+    }
+}

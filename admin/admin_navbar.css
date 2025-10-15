@@ -1,0 +1,110 @@
+/* ✅ 外層黑底滿版，置中對齊 .navbar-inner */
+.navbar {
+    width: 100%;
+    background-color: #212529;
+    padding: 10px 0;
+}
+
+.navbar-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+/* ✅ 所有主選項按鈕 */
+.navbar a,
+.dropdown-button {
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    background: none;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* ✅ active 狀態用亮色 + 黑字 */
+.navbar a.active,
+.dropdown-button.active {
+    background-color: #ffc107;
+    color: black;
+}
+
+/* ✅ hover 效果 */
+.navbar a:hover,
+.dropdown-button:hover {
+    background-color: #0d6efd;
+    color: white;
+}
+
+/* ✅ 下拉選單區域 */
+.dropdown {
+    position: relative;
+}
+
+/* ✅ 下拉選單樣式 */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: white;
+    min-width: 180px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 5px;
+    z-index: 1001;
+    padding: 5px 0;
+}
+
+/* ✅ 子選單文字黑底白字的切換 */
+.dropdown-content a {
+    color: black;
+    padding: 10px 15px;
+    display: block;
+    text-decoration: none;
+    background-color: white;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.dropdown-content a:hover {
+    background-color: #0d6efd;
+    color: white;
+}
+
+/* ✅ 滑過上層立即展開下拉 */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* ✅ 使用者資訊 */
+.user-area {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+}
+
+.user-area span {
+    font-weight: bold;
+    color: #ffc107;
+    font-size: 15px;
+}
+
+.logout-button {
+    background-color: #dc3545;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 5px;
+    font-size: 14px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.logout-button:hover {
+    background-color: #b02a37;
+}

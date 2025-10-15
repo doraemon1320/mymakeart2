@@ -1,0 +1,138 @@
+/* ? 基本排版 */
+body {
+    background-color: #f8f9fa;
+    font-family: Arial, sans-serif;
+}
+
+/* ? 員工大頭照 */
+.employee-photo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #dee2e6;
+}
+
+/* ? 卡片樣式 */
+.card {
+    margin-bottom: 20px;
+    border-radius: 6px;
+}
+
+.card-header {
+    font-weight: bold;
+}
+
+/* ? 表格內容字體大小與對齊 */
+.table th, .table td {
+    vertical-align: middle;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+/* ? 分頁按鈕樣式 */
+.pagination button {
+    margin: 3px;
+    padding: 5px 10px;
+    border: 1px solid #007bff;
+    background-color: white;
+    color: #007bff;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.pagination button.active {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+}
+
+/* ? 行事曆排版（兩個月並排） */
+.calendar-container {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    flex-wrap: nowrap;
+    margin-bottom: 20px;
+}
+
+.calendar-wrapper {
+    flex: 1 1 48%;
+    max-width: 100%;
+}
+
+/* ? 行事曆表格樣式 */
+.calendar-table {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
+    font-size: 14px;
+}
+
+.calendar-table th,
+.calendar-table td {
+    border: 1px solid #ccc;
+    text-align: center;
+    height: 52px;
+    position: relative;
+    padding: 0;
+    vertical-align: top;
+}
+
+/* ? 星期欄背景色 */
+.calendar-table th {
+ background-color: #f1f1f1;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle;
+    height: 52px;
+    line-height: 52px;
+    padding: 0;
+}
+
+/* ? 日期數字 */
+.calendar-table td .day-number {
+    display: block;
+    font-size: 16px;
+    margin-top: 4px;
+    color: #000;
+}
+
+/* ? 標註文字：國定假日名稱或週末 */
+.calendar-table td .label {
+    display: block;
+    font-size: 11px;
+    color: #c00;
+    margin-top: -2px;
+    white-space: nowrap;
+}
+
+/* ? 顏色標記區：背景顏色根據假別標記 */
+.holiday {
+    background-color: #ffecec;
+}
+
+.weekend {
+    background-color: #fff0f0;
+}
+
+.leave-approved {
+    background-color: #fff3cd !important;
+}
+
+.overtime-approved {
+    background-color: #d4edda !important;
+}
+
+/* ? 若無其他假別時維持白底 */
+.calendar-table td:not(.holiday):not(.weekend):not(.leave-approved):not(.overtime-approved) {
+    background-color: #fff;
+}
+
+/* ? 月份標籤下方置中顯示 */
+.month-label {
+    text-align: center;
+    color: #666;
+    font-size: 14px;
+    margin-top: 5px;
+}

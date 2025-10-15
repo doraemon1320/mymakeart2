@@ -1,0 +1,22 @@
+
+    .table th, .table td {
+        vertical-align: middle;
+        text-align: center;
+    }
+
+/* 強制覆蓋 Bootstrap table 的背景色 */
+table.attendance-table tbody tr.status-row.status-normal td {
+    background-color: #e0f7e9 !important;
+}
+table.attendance-table tbody tr.status-row.status-yellow td {
+    background-color: #fff3cd !important;
+}
+table.attendance-table tbody tr.status-row.status-orange td {
+    background-color: #ffe0b2 !important;
+}
+table.attendance-table tbody tr.status-row.status-red td {
+    background-color: #f8d7da !important;
+}
+table.attendance-table tbody tr.status-row.status-purple td {
+    background-color: #e1d5f0 !important;
+}

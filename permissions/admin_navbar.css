@@ -1,0 +1,81 @@
+body {
+    font-family: "Microsoft JhengHei", sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.navbar {
+    background-color: #343a40;
+    padding: 12px 20px;
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.navbar a {
+    color: white;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.navbar a:hover {
+    background-color: #495057;
+}
+
+.navbar a.logout {
+    background-color: #dc3545;
+}
+.navbar a.logout:hover {
+    background-color: #c82333;
+}
+
+h1 {
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.card-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.card {
+    display: inline-block;
+    background-color: #007BFF;
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    padding: 20px;
+    width: 220px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.card:hover {
+    background-color: #0056b3;
+}
+
+.card.logout {
+    background-color: #dc3545;
+}
+.card.logout:hover {
+    background-color: #c82333;
+}
