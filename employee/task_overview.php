@@ -1,6 +1,5 @@
 <?php
 require_once "../db_connect.php";
-session_start();
 
 // 登入與權限檢查
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
@@ -40,10 +39,68 @@ $stmt = $conn->prepare("SELECT id, name FROM employees WHERE id IN ($id_placehol
 $stmt->bind_param($types, ...$params);
 $stmt->execute();
 $employees_result = $stmt->get_result();
+$employees = [];
+while ($row = $employees_result->fetch_assoc()) {
+    $employees[] = $row;
+}
+$stmt->close();
 
 // 建立年份與月份選項
 $year_options = range(date("Y") - 3, date("Y"));
 $month_options = range(1, 12);
+
+$workflow_labels = [
+    'construction' => '施工',
+    'design' => '設計',
+    'quotation' => '報價'
+];
+
+$employee_stats = [];
+foreach ($employees as $emp) {
+    $eid = (int)$emp['id'];
+    $workflow_stmt = $conn->prepare("SELECT ts.workflow_code, COUNT(*) AS total, SUM(CASE WHEN ts.is_terminal = 1 THEN 1 ELSE 0 END) AS done, SUM(CASE WHEN ts.is_terminal = 0 THEN 1 ELSE 0 END) AS active, SUM(CASE WHEN ts.is_terminal = 0 AND t.due_date < CURDATE() THEN 1 ELSE 0 END) AS overdue FROM tasks t JOIN task_statuses ts ON t.task_status_id = ts.id WHERE t.assigned_to = ? AND YEAR(t.due_date) = ? AND MONTH(t.due_date) = ? GROUP BY ts.workflow_code");
+    $workflow_stmt->bind_param("iii", $eid, $selected_year, $selected_month);
+    $workflow_stmt->execute();
+    $workflow_result = $workflow_stmt->get_result();
+
+    $total = 0;
+    $done = 0;
+    $active = 0;
+    $overdue = 0;
+    $workflows = [
+        'construction' => ['active' => 0, 'done' => 0],
+        'design' => ['active' => 0, 'done' => 0],
+        'quotation' => ['active' => 0, 'done' => 0]
+    ];
+
+    while ($row = $workflow_result->fetch_assoc()) {
+        $code = $row['workflow_code'];
+        $total += (int)$row['total'];
+        $done += (int)$row['done'];
+        $active += (int)$row['active'];
+        $overdue += (int)$row['overdue'];
+        if (!isset($workflows[$code])) {
+            $workflows[$code] = ['active' => 0, 'done' => 0];
+        }
+        $workflows[$code]['active'] = (int)$row['active'];
+        $workflows[$code]['done'] = (int)$row['done'];
+    }
+
+    $workflow_stmt->close();
+
+    $percent = $total > 0 ? round(($done / $total) * 100) : 0;
+
+    $employee_stats[] = [
+        'id' => $eid,
+        'name' => $emp['name'],
+        'total' => $total,
+        'done' => $done,
+        'active' => $active,
+        'overdue' => $overdue,
+        'percent' => $percent,
+        'workflows' => $workflows
+    ];
+}
 ?>
 
 <!DOCTYPE html>
@@ -51,11 +108,23 @@ $month_options = range(1, 12);
 <head>
     <meta charset="UTF-8">
     <title>任務追蹤總覽</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="employee_navbar.css">
+    <style>
+        body { background-color: #f6f7fb; }
+        .table thead.table-primary { background-color: #FFCD00; color: #1f1f1f; }
+        .card-header-brand { background: linear-gradient(90deg, #345D9D 0%, #FFCD00 100%); color: #1f1f1f; font-weight: 700; }
+        .badge-workflow { background-color: #345D9D; }
+        .badge-workflow.done { background-color: #28a745; }
+        .stat-card { border-left: 6px solid #345D9D; }
+    </style>
 </head>
-<body class="bg-light">
+<body>
+<?php include 'employee_navbar.php'; ?>
 <div class="container py-4">
-    <h2 class="mb-4">📊 任務完成統計（<?= $selected_year ?> 年 <?= $selected_month ?> 月）</h2>
+    <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+        <h2 class="fw-bold text-primary">📊 任務完成統計（<?= $selected_year ?> 年 <?= $selected_month ?> 月）</h2>
+    </div>
 
     <form method="get" class="row g-3 mb-4">
         <div class="col-auto">
@@ -77,45 +146,116 @@ $month_options = range(1, 12);
         </div>
     </form>
 
-    <div class="card">
-        <div class="card-body">
-            <?php while ($emp = $employees_result->fetch_assoc()):
-                $eid = $emp['id'];
-                $stmt = $conn->prepare("
-                    SELECT 
-                        COUNT(*) AS total,
-                        SUM(CASE WHEN c.id IS NOT NULL THEN 1 ELSE 0 END) AS done,
-                        SUM(CASE WHEN c.id IS NULL AND t.due_date < CURDATE() THEN 1 ELSE 0 END) AS overdue
-                    FROM tasks t
-                    LEFT JOIN task_completions c ON t.id = c.task_id AND c.employee_id = ?
-                    WHERE t.assigned_to = ?
-                      AND YEAR(t.due_date) = ?
-                      AND MONTH(t.due_date) = ?
-                ");
-                $stmt->bind_param("iiii", $eid, $eid, $selected_year, $selected_month);
-                $stmt->execute();
-                $stats = $stmt->get_result()->fetch_assoc();
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header card-header-brand">任務量表格</div>
+        <div class="card-body p-0">
+            <?php if (!empty($employee_stats)): ?>
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle mb-0">
+                        <thead class="table-primary text-center">
+                            <tr>
+                                <th rowspan="2">員工</th>
+                                <th rowspan="2">總任務</th>
+                                <th rowspan="2">進行中</th>
+                                <th rowspan="2">已完成</th>
+                                <th rowspan="2">逾期</th>
+                                <th colspan="2">施工流程</th>
+                                <th colspan="2">設計流程</th>
+                                <th colspan="2">報價流程</th>
+                            </tr>
+                            <tr>
+                                <th>進行中</th>
+                                <th>結案</th>
+                                <th>進行中</th>
+                                <th>結案</th>
+                                <th>進行中</th>
+                                <th>結案</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center">
+                        <?php foreach ($employee_stats as $stat): ?>
+                            <tr>
+                                <td class="text-start fw-semibold"><?= htmlspecialchars($stat['name']) ?></td>
+                                <td><?= $stat['total'] ?></td>
+                                <td><?= $stat['active'] ?></td>
+                                <td><?= $stat['done'] ?></td>
+                                <td><?= $stat['overdue'] ?></td>
+                                <td><?= $stat['workflows']['construction']['active'] ?></td>
+                                <td><?= $stat['workflows']['construction']['done'] ?></td>
+                                <td><?= $stat['workflows']['design']['active'] ?></td>
+                                <td><?= $stat['workflows']['design']['done'] ?></td>
+                                <td><?= $stat['workflows']['quotation']['active'] ?></td>
+                                <td><?= $stat['workflows']['quotation']['done'] ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php else: ?>
+                <div class="p-4 text-muted">目前沒有可統計的下屬任務資料。</div>
+            <?php endif; ?>
+        </div>
+    </div>
 
-                $total = $stats['total'];
-                $done = $stats['done'];
-                $overdue = $stats['overdue'];
-                $percent = $total > 0 ? round(($done / $total) * 100) : 0;
-            ?>
-                <div class="mb-4">
-                    <h5><?= htmlspecialchars($emp['name']) ?></h5>
-                    <div class="mb-1">
-                        ✅ 完成 <?= $done ?> / 🔢 總共 <?= $total ?> 
-                        <?= $overdue > 0 ? " ⏰ 逾期 $overdue 筆" : "" ?>
+    <?php foreach ($employee_stats as $stat): ?>
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+                    <h5 class="fw-bold text-primary mb-0"><?= htmlspecialchars($stat['name']) ?></h5>
+                    <span class="badge bg-light text-dark">完成率 <?= $stat['percent'] ?>%</span>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-3">
+                        <div class="card stat-card shadow-sm border-0 h-100">
+                            <div class="card-body">
+                                <div class="text-muted small">總任務</div>
+                                <div class="display-6 fw-bold text-primary"><?= $stat['total'] ?></div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="progress">
-                        <div class="progress-bar bg-success" style="width: <?= $percent ?>%">
-                            <?= $percent ?>%
+                    <div class="col-md-3">
+                        <div class="card stat-card shadow-sm border-0 h-100" style="border-color:#FFCD00;">
+                            <div class="card-body">
+                                <div class="text-muted small">進行中</div>
+                                <div class="display-6 fw-bold text-warning"><?= $stat['active'] ?></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card shadow-sm border-0 h-100" style="border-color:#28a745;">
+                            <div class="card-body">
+                                <div class="text-muted small">已完成</div>
+                                <div class="display-6 fw-bold text-success"><?= $stat['done'] ?></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card shadow-sm border-0 h-100" style="border-color:#E36386;">
+                            <div class="card-body">
+                                <div class="text-muted small">逾期</div>
+                                <div class="display-6 fw-bold text-danger"><?= $stat['overdue'] ?></div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            <?php endwhile; ?>
+                <div class="progress mb-3" style="height: 18px;">
+                    <div class="progress-bar bg-success" style="width: <?= $stat['percent'] ?>%">
+                        <?= $stat['percent'] ?>%
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <?php foreach ($stat['workflows'] as $code => $data): ?>
+                        <span class="badge badge-workflow">
+                            <?= $workflow_labels[$code] ?? strtoupper($code) ?> 進行中 <?= $data['active'] ?> 件
+                        </span>
+                        <span class="badge badge-workflow done">
+                            <?= $workflow_labels[$code] ?? strtoupper($code) ?> 結案 <?= $data['done'] ?> 件
+                        </span>
+                    <?php endforeach; ?>
+                </div>
+            </div>
         </div>
-    </div>
+    <?php endforeach; ?>
 </div>
 </body>
 </html>
