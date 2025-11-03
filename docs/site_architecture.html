@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>網站整體架構規劃</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  </head>
+  <body class="bg-light">
+    <div class="container py-5">
+      <header class="mb-4 text-center">
+        <h1 class="fw-bold">網站整體架構規劃建議</h1>
+        <p class="text-muted">聚焦於 Bootstrap 5、jQuery 與 PHP 後端的協同設計</p>
+      </header>
+
+      <section class="mb-5">
+        <div class="row g-3">
+          <div class="col-12 col-lg-6">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <h2 class="h5 card-title">一、系統定位</h2>
+                <p class="card-text">
+                  本系統以模組化架構為核心，前端負責互動介面與資料視覺化，後端負責商業邏輯、權限控管與資料流管理。採用 MVC 與 RESTful API 混合策略，讓既有 PHP 程式能平順擴充，同時可支援後續串接行動端或第三方服務。
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-lg-6">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <h2 class="h5 card-title">二、技術棧概覽</h2>
+                <ul class="mb-0">
+                  <li>前端：Bootstrap 5 RWD、jQuery 互動控制、Chart.js 圖表模組。</li>
+                  <li>後端：PHP 8 + Composer、客製 MVC 核心、MySQL 8 資料庫、JWT 與 Session 混合驗證。</li>
+                  <li>部署：Nginx + PHP-FPM、Git 版本控管、自動化部署腳本（Shell 或 GitHub Actions）。</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 mb-3">三、頁面與前端模組配置</h2>
+        <p class="mb-3">採用 <code>container</code>、<code>row</code>、<code>col</code> 進行響應式佈局，並以 <code>table table-bordered table-primary</code> 彙整各項需求。</p>
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead class="table-primary">
+              <tr>
+                <th>頁面/元件</th>
+                <th>主要內容</th>
+                <th>Bootstrap 佈局</th>
+                <th>互動重點</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>儀表板 Dashboard</td>
+                <td>關鍵指標、圖表、快速操作入口</td>
+                <td>container &gt; row &gt; col-md-6，卡片組合、Chart.js</td>
+                <td>AJAX 更新 KPI、圖表動畫、通知提醒</td>
+              </tr>
+              <tr>
+                <td>員工管理</td>
+                <td>員工清單、分頁、權限與狀態調整</td>
+                <td>container-fluid、row、table table-bordered table-hover</td>
+                <td>即時搜尋、欄位排序、行內編輯 modals</td>
+              </tr>
+              <tr>
+                <td>權限設定</td>
+                <td>角色對應權限矩陣</td>
+                <td>container、table table-bordered table-primary 標示標題</td>
+                <td>多選 checkbox、即時同步權限草稿</td>
+              </tr>
+              <tr>
+                <td>稽核紀錄</td>
+                <td>操作紀錄、篩選器、匯出 CSV</td>
+                <td>row 內嵌 card + table-responsive</td>
+                <td>日期區間篩選、匯出進度顯示</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 mb-3">四、資料流程與 API 層級</h2>
+        <div class="row g-3">
+          <div class="col-12 col-xl-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <h3 class="h5">前端與 API 溝通流程</h3>
+                <ol class="mb-3">
+                  <li>前端元件透過 jQuery AJAX 或 Fetch 呼叫 REST API。</li>
+                  <li>API Controller 驗證權限、資料結構，轉交 Service。</li>
+                  <li>Service 執行商業邏輯，透過 Repository 與資料庫互動。</li>
+                  <li>結果以 JSON 格式回傳，前端動態更新介面。</li>
+                </ol>
+                <p class="mb-0">資料格式採統一回應包裝：<code>{ status, message, data, meta }</code>。</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-xl-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <h3 class="h5">主要 API 範例</h3>
+                <div class="table-responsive">
+                  <table class="table table-bordered">
+                    <thead class="table-primary">
+                      <tr>
+                        <th>HTTP 方法</th>
+                        <th>路徑</th>
+                        <th>用途說明</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>POST</td>
+                        <td>/api/auth/login</td>
+                        <td>登入後回傳認證憑證並記錄稽核事件。</td>
+                      </tr>
+                      <tr>
+                        <td>GET</td>
+                        <td>/api/dashboard/metrics</td>
+                        <td>取得儀表板指標，支援快取與即時刷新。</td>
+                      </tr>
+                      <tr>
+                        <td>POST</td>
+                        <td>/api/employees</td>
+                        <td>新增員工資料，觸發同步通知與審批流程。</td>
+                      </tr>
+                      <tr>
+                        <td>PATCH</td>
+                        <td>/api/permissions/{role}</td>
+                        <td>更新角色權限矩陣，回傳差異摘要。</td>
+                      </tr>
+                      <tr>
+                        <td>GET</td>
+                        <td>/api/audit-logs</td>
+                        <td>查詢稽核紀錄，支援範圍、類型、關鍵字篩選。</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 mb-3">五、後端模組化規劃（PHP）</h2>
+        <p class="mb-3">以下針對 PHP 模組依照功能編號逐項說明，利於責任界定與未來維運。</p>
+        <div class="table-responsive mb-3">
+          <table class="table table-bordered">
+            <thead class="table-primary">
+              <tr>
+                <th>編號</th>
+                <th>模組名稱</th>
+                <th>責任說明</th>
+                <th>整合重點</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>PHP-01</td>
+                <td>核心啟動與路由中心</td>
+                <td>統一載入環境設定、路由分派與錯誤處理。</td>
+                <td>支援中介層、API 版本控管與全域例外捕捉。</td>
+              </tr>
+              <tr>
+                <td>PHP-02</td>
+                <td>身分驗證服務</td>
+                <td>處理登入、登出、Token 管理與密碼政策。</td>
+                <td>可插拔雙因素驗證與單一登入（SSO）。</td>
+              </tr>
+              <tr>
+                <td>PHP-03</td>
+                <td>員工管理服務</td>
+                <td>員工 CRUD、批次匯入與狀態切換流程。</td>
+                <td>透過事件驅動同步稽核與通知模組。</td>
+              </tr>
+              <tr>
+                <td>PHP-04</td>
+                <td>權限策略服務</td>
+                <td>維護角色與權限矩陣，提供策略判斷。</td>
+                <td>以 Policy + Gate 設計，利於前端顯示控管。</td>
+              </tr>
+              <tr>
+                <td>PHP-05</td>
+                <td>稽核紀錄服務</td>
+                <td>追蹤資料異動、匯出與登入行為並封存。</td>
+                <td>支援非同步寫入與排程清理舊紀錄。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <pre class="bg-white border rounded p-3 small">
+// PHP-03 範例：服務層事件驅動
+$employeeService-&gt;on('employee.updated', function ($payload) use ($auditLogger) {
+    $auditLogger-&gt;record('employee_update', $payload);
+});
+        </pre>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 mb-3">六、前端互動規劃（JavaScript/jQuery）</h2>
+        <p class="mb-3">前端互動採模組化管理，以下列出 jQuery 功能編號與對應流程，確保與 PHP 後端串接時責任清晰。</p>
+        <div class="table-responsive mb-3">
+          <table class="table table-bordered">
+            <thead class="table-primary">
+              <tr>
+                <th>編號</th>
+                <th>功能名稱</th>
+                <th>用途</th>
+                <th>觸發時機</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>JS-01</td>
+                <td>儀表板即時更新</td>
+                <td>定時拉取最新 KPI 數據並更新圖表。</td>
+                <td>每 60 秒觸發並提供手動刷新按鈕。</td>
+              </tr>
+              <tr>
+                <td>JS-02</td>
+                <td>員工列表行內編輯</td>
+                <td>點擊表格列觸發視窗，送出後以 AJAX 更新。</td>
+                <td>使用者點擊「編輯」按鈕。</td>
+              </tr>
+              <tr>
+                <td>JS-03</td>
+                <td>權限矩陣即時同步</td>
+                <td>勾選核取方塊後即刻送出變更，避免遺漏。</td>
+                <td>核取方塊 change 事件。</td>
+              </tr>
+              <tr>
+                <td>JS-04</td>
+                <td>稽核紀錄匯出</td>
+                <td>呼叫後端產生 CSV，顯示進度條與結果。</td>
+                <td>使用者點擊「匯出」按鈕。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <pre class="bg-white border rounded p-3 small">
+// JS-03 範例：權限即時同步
+$(document).on('change', '.permission-checkbox', function () {
+  const payload = {
+    role: $('#roleSelector').val(),
+    permission: $(this).data('permission'),
+    enabled: $(this).is(':checked')
+  };
+
+  $.ajax({
+    url: '/api/permissions/' + payload.role,
+    method: 'PATCH',
+    data: JSON.stringify(payload),
+    contentType: 'application/json',
+    success: function (res) {
+      $('#permissionStatus').text(res.message).addClass('text-success');
+    },
+    error: function (xhr) {
+      $('#permissionStatus').text(xhr.responseJSON?.message || '更新失敗').addClass('text-danger');
+    }
+  });
+});
+        </pre>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 mb-3">七、資料庫與效能建議</h2>
+        <ul class="list-group">
+          <li class="list-group-item">資料庫正規化至第三範式，關鍵欄位加上索引與全文檢索。</li>
+          <li class="list-group-item">導入資料庫遷移（Migration）與 Seeder，確保環境一致性。</li>
+          <li class="list-group-item">利用 Redis 快取常用查詢、Session 與權限矩陣。</li>
+          <li class="list-group-item">排程（Cron）執行稽核紀錄歸檔、報表寄送。</li>
+        </ul>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 mb-3">八、測試與品質保證</h2>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <h3 class="h5">自動化測試</h3>
+                <ul>
+                  <li>PHPUnit：Service 與 Repository 單元測試。</li>
+                  <li>Pest 或 Codeception：API 整合測試。</li>
+                  <li>Jest + jsdom：關鍵 jQuery 模組邏輯測試（可選）。</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <h3 class="h5">CI/CD 流程</h3>
+                <ol>
+                  <li>Git push 觸發 CI，執行 Lint、單元測試、建置。</li>
+                  <li>通過後自動部署至測試環境，進行 UAT。</li>
+                  <li>使用 Infrastructure as Code 管理環境差異。</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 mb-3">九、前後端整合節點</h2>
+        <div class="row g-3 mb-4">
+          <div class="col-lg-6">
+            <div class="card h-100 border-info">
+              <div class="card-body">
+                <h3 class="h6 text-info">整合節點-01：統一錯誤回應格式</h3>
+                <p class="mb-0">所有 PHP-XX 模組回傳 <code>{ status, message, data, meta }</code>，供 JS-XX 模組直接解析並顯示。</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="card h-100 border-danger">
+              <div class="card-body">
+                <h3 class="h6 text-danger">整合節點-02：前端事件與後端事件對應</h3>
+                <p class="mb-0">JS-02、JS-03 觸發後對應 PHP-03、PHP-04 事件，稽核服務 PHP-05 收集紀錄，確保責任可追蹤。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <h2 class="h4 mb-3">十、後續延伸建議</h2>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="card h-100 border-primary">
+              <div class="card-body">
+                <h3 class="h6 text-primary">A. 行動端支援</h3>
+                <p class="mb-0">使用 PWA 技術提供離線可用與推播通知。</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card h-100 border-success">
+              <div class="card-body">
+                <h3 class="h6 text-success">B. 視覺主題擴充</h3>
+                <p class="mb-0">整合 Bootstrap Theme 或 CSS 變數切換深色模式。</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card h-100 border-warning">
+              <div class="card-body">
+                <h3 class="h6 text-warning">C. 數據分析升級</h3>
+                <p class="mb-0">導入資料倉儲與 BI 工具，提供更進階洞察。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="text-center text-muted small">
+        <p class="mb-1">此文件提供網站架構規劃參考，實作時請依實際需求調整。</p>
+        <p class="mb-0">更新日期：2024-05-06</p>
+      </footer>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
