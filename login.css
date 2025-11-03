@@ -1,65 +1,135 @@
-body {
+:root {
+    --brand-yellow: #ffcd00;
+    --brand-pink: #e36386;
+    --brand-blue: #345d9d;
+    --brand-blue-dark: #1f3f76;
+    --brand-gray: #6c757d;
+    --brand-light: #f9f7ff;
+}
+
+.login-body {
     font-family: "Microsoft JhengHei", sans-serif;
-    background-color: #f2f2f2;
+    min-height: 100vh;
     margin: 0;
-    padding: 0;
+    background: radial-gradient(circle at 15% 20%, rgba(227, 99, 134, 0.15), transparent 55%),
+                radial-gradient(circle at 85% 25%, rgba(52, 93, 157, 0.18), transparent 55%),
+                radial-gradient(circle at 20% 80%, rgba(255, 205, 0, 0.2), transparent 50%),
+                linear-gradient(135deg, #ffffff 0%, #f3f6ff 55%, #ffffff 100%);
 }
 
-.login-container {
-    width: 400px;
-    margin: 80px auto;
-    background-color: white;
-    padding: 30px 40px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+.login-frame {
+    border-radius: 32px;
+    background: rgba(255, 255, 255, 0.35);
+    padding: 18px;
+    backdrop-filter: blur(6px);
 }
 
-h1 {
-    text-align: center;
-    margin-bottom: 25px;
-    color: #333;
+.login-surface {
+    z-index: 2;
 }
 
-form {
+.decor {
+    position: absolute;
+    display: block;
+    border-radius: 50%;
+    filter: blur(0.5px);
+    opacity: 0.75;
+}
+
+.decor-1 {
+    width: 160px;
+    height: 160px;
+    top: -60px;
+    left: -40px;
+    background: radial-gradient(circle at 60% 40%, rgba(227, 99, 134, 0.8), rgba(227, 99, 134, 0));
+}
+
+.decor-2 {
+    width: 200px;
+    height: 200px;
+    right: -70px;
+    bottom: -60px;
+    background: radial-gradient(circle at 40% 60%, rgba(255, 205, 0, 0.85), rgba(255, 205, 0, 0));
+}
+
+.brand-logo {
+    width: 140px;
+    height: 140px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 70%);
     display: flex;
-    flex-direction: column;
-    gap: 15px;
+    align-items: center;
+    justify-content: center;
 }
 
-label {
-    font-weight: bold;
-    font-size: 14px;
+.brand-logo img {
+    max-width: 100%;
+    max-height: 100%;
 }
 
-input {
-    padding: 10px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+.text-brand-blue {
+    color: var(--brand-blue);
 }
 
-button {
-    padding: 12px;
-    font-size: 16px;
-    font-weight: bold;
-    color: white;
-    background-color: #007BFF;
+.text-brand-gray {
+    color: var(--brand-gray);
+}
+
+.brand-table thead {
+    background: linear-gradient(135deg, rgba(52, 93, 157, 0.9), rgba(31, 63, 118, 0.95));
+    color: #fff;
+    font-size: 1.05rem;
+    letter-spacing: 0.05rem;
+}
+
+.brand-table tbody th {
+    width: 22%;
+    font-weight: 700;
+    color: var(--brand-blue-dark);
+}
+
+.brand-table tbody td {
+    background-color: #ffffff;
+}
+
+.bg-brand-light {
+    background-color: rgba(243, 246, 255, 0.85) !important;
+}
+
+.btn-brand {
+    background: linear-gradient(135deg, var(--brand-blue) 0%, var(--brand-blue-dark) 100%);
+    color: #ffffff; /* ← 加這行，文字變白 */
+    font-weight: 700;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
     border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: 0.2s ease;
+    border-radius: 999px;
+    box-shadow: 0 8px 16px rgba(31, 63, 118, 0.25);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-button:hover {
-    background-color: #0056b3;
+.btn-brand:hover,
+.btn-brand:focus {
+    color: var(--brand-yellow);
+    background: linear-gradient(135deg, var(--brand-blue-dark) 0%, #152c54 100%);
+    box-shadow: 0 10px 20px rgba(21, 44, 84, 0.35);
 }
 
-.error {
-    background-color: #ffecec;
-    color: #d93025;
-    border: 1px solid #d93025;
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 15px;
-    text-align: center;
+.form-control:focus {
+    border-color: var(--brand-pink);
+    box-shadow: 0 0 0 0.25rem rgba(227, 99, 134, 0.25);
+}
+
+@media (max-width: 767.98px) {
+    .login-frame {
+        padding: 12px;
+    }
+
+    .login-surface {
+        padding: 2.5rem 1.75rem !important;
+    }
+
+    .brand-logo {
+        width: 110px;
+        height: 110px;
+    }
 }
