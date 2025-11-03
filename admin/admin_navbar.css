@@ -1,88 +1,76 @@
-/* ✅ 外層黑底滿版，置中對齊 .navbar-inner */
-.navbar {
-    width: 100%;
-    background-color: #212529;
-    padding: 10px 0;
+:root {
+    --brand-gold: #ffcd00;
+    --brand-rose: #e36386;
+    --brand-blue: #345d9d;
+    --brand-dark: #1d2f4d;
+    --brand-text: #f8f9fa;
 }
 
-.navbar-inner {
-    max-width: 1200px;
-    margin: 0 auto;
+/* ✅ 外層容器，維持雙層設計 */
+.admin-navbar {
+    width: 100%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+    position: relative;
+    z-index: 1050;
+    font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+}
+
+/* ✅ 上層品牌資訊帶 */
+.admin-navbar-top {
+    background: linear-gradient(90deg, var(--brand-gold) 0%, var(--brand-rose) 100%);
+    color: var(--brand-text);
+    padding: 12px 0;
+}
+
+.admin-navbar-top .row {
+    --bs-gutter-x: 1rem;
+}
+
+.navbar-logo {
     display: flex;
     align-items: center;
-    gap: 20px;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+    padding: 6px 18px;
 }
 
-/* ✅ 所有主選項按鈕 */
-.navbar a,
-.dropdown-button {
-    color: white;
-    padding: 10px 20px;
-    font-size: 16px;
-    font-weight: bold;
-    border: none;
-    border-radius: 5px;
-    text-decoration: none;
-    background: none;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-/* ✅ active 狀態用亮色 + 黑字 */
-.navbar a.active,
-.dropdown-button.active {
-    background-color: #ffc107;
-    color: black;
-}
-
-/* ✅ hover 效果 */
-.navbar a:hover,
-.dropdown-button:hover {
-    background-color: #0d6efd;
-    color: white;
-}
-
-/* ✅ 下拉選單區域 */
-.dropdown {
-    position: relative;
-}
-
-/* ✅ 下拉選單樣式 */
-.dropdown-content {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: white;
-    min-width: 180px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    border-radius: 5px;
-    z-index: 1001;
-    padding: 5px 0;
-}
-
-/* ✅ 子選單文字黑底白字的切換 */
-.dropdown-content a {
-    color: black;
-    padding: 10px 15px;
-    display: block;
-    text-decoration: none;
-    background-color: white;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-.dropdown-content a:hover {
-    background-color: #0d6efd;
-    color: white;
-}
-
-/* ✅ 滑過上層立即展開下拉 */
-.dropdown:hover .dropdown-content {
+.navbar-logo img {
+    height: 54px;
+    width: auto;
     display: block;
 }
 
-/* ✅ 使用者資訊 */
+.brand-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    color: var(--brand-text);
+}
+
+.brand-title {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.brand-subtitle {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.top-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.top-actions .btn {
+    border-radius: 999px;
+    padding-inline: 18px;
+    font-weight: 600;
+}
+
 .user-area {
-    margin-left: auto;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -90,21 +78,164 @@
 }
 
 .user-area span {
-    font-weight: bold;
-    color: #ffc107;
+    font-weight: 700;
+    color: #fff6d4;
     font-size: 15px;
 }
 
 .logout-button {
-    background-color: #dc3545;
-    color: white;
-    padding: 5px 12px;
-    border-radius: 5px;
+    background: #dc3545;
+    color: #ffffff;
+    padding: 6px 16px;
+    border-radius: 999px;
     font-size: 14px;
     text-decoration: none;
-    transition: background-color 0.3s;
+    transition: background-color 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .logout-button:hover {
-    background-color: #b02a37;
+    background: #b02a37;
+}
+
+/* ✅ 下層藍色功能列 */
+.admin-navbar-bottom {
+    background-color: var(--brand-blue);
+    padding: 6px 0;
+}
+
+.menu-inner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.admin-nav-link,
+.dropdown-button {
+    color: #ffffff;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    text-decoration: none;
+    background: transparent;
+    transition: background-color 0.3s, color 0.3s, transform 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.admin-nav-link.active,
+.dropdown-button.active,
+.admin-nav-link.text-highlight {
+    background-color: #ffde59;
+    color: #1f1f1f;
+    box-shadow: 0 4px 12px rgba(255, 222, 89, 0.45);
+}
+
+.admin-nav-link.text-highlight {
+    font-weight: 700;
+}
+
+.admin-nav-link:hover,
+.dropdown-button:hover,
+.admin-dropdown.open > .dropdown-button {
+    background-color: rgba(255, 255, 255, 0.18);
+    transform: translateY(-1px);
+}
+
+.admin-dropdown {
+    position: relative;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: calc(100% - 4px);
+    left: 0;
+    min-width: 200px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+    padding: 12px 0;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.dropdown-content::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: 0;
+    width: 100%;
+    height: 10px;
+    background: transparent;
+}
+
+.dropdown-content a {
+    color: #1f1f1f;
+    padding: 10px 18px;
+    display: block;
+    text-decoration: none;
+    transition: background-color 0.25s, color 0.25s, padding-left 0.25s;
+}
+
+.dropdown-content a:hover {
+    background-color: var(--brand-rose);
+    color: #ffffff;
+    padding-left: 24px;
+}
+
+.admin-dropdown:hover .dropdown-content,
+.admin-dropdown.open .dropdown-content {
+    display: block;
+}
+
+@media (max-width: 1200px) {
+    .top-actions {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 992px) {
+    .admin-navbar-top .row {
+        justify-content: center;
+        text-align: center;
+    }
+    .top-actions,
+    .user-area {
+        justify-content: center;
+    }
+    .menu-inner {
+        justify-content: center;
+    }
+    .dropdown-content {
+        position: static;
+        width: 100%;
+        margin-top: 8px;
+        box-shadow: none;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    .dropdown-content::before {
+        display: none;
+    }
+}
+
+@media (max-width: 576px) {
+    .navbar-logo {
+        padding: 4px 12px;
+    }
+    .navbar-logo img {
+        height: 44px;
+    }
+    .admin-nav-link,
+    .dropdown-button {
+        padding: 8px 14px;
+        font-size: 15px;
+    }
 }
