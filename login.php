@@ -1,48 +1,49 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) session_start();
+// (PHP-1) 啟動 Session 與載入資料庫連線
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require_once "db_connect.php";
 
+// (PHP-2) 預設狀態與表單回填值
 $error = "";
+$values = [
+    'username' => ''
+];
 
+// (PHP-3) 監聽登入請求
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'] ?? '';
+    // (PHP-3-1) 取得並整理表單輸入
+    $values['username'] = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
-    $selected_role = $_POST['role'] ?? 'employee'; // 預設為員工身份
 
-    $stmt = $conn->prepare("SELECT * FROM employees WHERE username = ?");
-    $stmt->bind_param("s", $username);
+    // (PHP-3-2) 驗證帳號密碼
+    $stmt = $conn->prepare("SELECT id, employee_number, username, name, role, company_id, role_id, password FROM employees WHERE username = ?");
+    $stmt->bind_param("s", $values['username']);
     $stmt->execute();
     $result = $stmt->get_result();
     $user = $result->fetch_assoc();
 
+    // (PHP-3-3) 建立登入 Session 並導向員工首頁
     if ($user && password_verify($password, $user['password'])) {
-        $actual_role = $user['role'];
+        $_SESSION['user'] = [
+            'id'              => $user['id'],
+            'employee_number' => $user['employee_number'],
+            'username'        => $user['username'],
+            'name'            => $user['name'],
+            'role'            => $user['role'],
+	    'is_manager'     => (int)($user['is_manager'] ?? 0),
+            'company_id'      => $user['company_id'],
+            'role_id'         => $user['role_id'],
+            'login_as'        => 'employee'
+        ];
 
-        // ✅ 員工不得以管理者身份登入
-        if ($selected_role === 'admin' && $actual_role !== 'admin') {
-            $error = "❌ 您沒有管理者權限，請重新選擇登入身份";
-        } else {
-            $_SESSION['user'] = [
-                'id'             => $user['id'],
-                'employee_number'=> $user['employee_number'],
-                'username'       => $user['username'],
-                'name'           => $user['name'],
-                'role'           => $actual_role,
-                'company_id'     => $user['company_id'],
-                'role_id'        => $user['role_id'],
-                'login_as'       => $selected_role // ✅ 記錄本次登入身份
-            ];
-
-            if ($selected_role === 'admin') {
-                header("Location: admin/admin_home.php");
-            } else {
-                header("Location: employee/employee_home.php");
-            }
-            exit;
-        }
-    } else {
-        $error = "帳號或密碼錯誤，請重新輸入";
+        header("Location: employee/employee_home.php");
+        exit;
     }
+
+    // (PHP-3-4) 回應錯誤訊息
+    $error = "帳號或密碼錯誤，請重新輸入";
 }
 ?>
 
@@ -51,78 +52,94 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>登入系統</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="login.css">
-    <style>
-        body {
-            font-family: "Microsoft JhengHei", sans-serif;
-        }
-        .login-container {
-            width: 350px;
-            margin: 60px auto;
-            border: 1px solid #ccc;
-            padding: 30px;
-            box-shadow: 0 0 10px #aaa;
-            background-color: #fff;
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        label {
-            display: block;
-            margin-top: 12px;
-        }
-        input[type="text"],
-        input[type="password"],
-        select {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            box-sizing: border-box;
-        }
-        .error {
-            color: red;
-            text-align: center;
-            margin-bottom: 15px;
-        }
-        button {
-            margin-top: 20px;
-            width: 100%;
-            padding: 10px;
-            background-color: #5cb85c;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #4cae4c;
-        }
-    </style>
+
 </head>
-<body>
-<div class="login-container">
-    <h1>登入系統</h1>
+<body class="login-body">
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="login-frame position-relative overflow-hidden">
+                <span class="decor decor-1"></span>
+                <span class="decor decor-2"></span>
+                <div class="login-surface position-relative bg-white rounded-4 border border-primary-subtle shadow-sm p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <div class="brand-logo mx-auto mb-3">
+                            <img src="LOGO/LOGO-06.png" alt="MY創藝企業識別" class="img-fluid">
+                        </div>
+                        <h1 class="fw-bold text-brand-blue mb-1">員工登入</h1>
+                        <p class="text-brand-gray mb-0">請使用公司提供之帳號密碼完成登入</p>
+                    </div>
 
-    <?php if ($error): ?>
-        <p class="error"><?= htmlspecialchars($error) ?></p>
-    <?php endif; ?>
+                    <?php if ($error): ?>
+                        <div class="alert alert-danger mb-4" role="alert">
+                            <?= htmlspecialchars($error) ?>
+                        </div>
+                    <?php endif; ?>
 
-    <form method="post">
-        <label for="username">帳號</label>
-        <input type="text" id="username" name="username" required>
-
-        <label for="password">密碼</label>
-        <input type="password" id="password" name="password" required>
-
-        <label for="role">選擇登入身份</label>
-        <select name="role" id="role" required>
-            <option value="employee">員工</option>
-            <option value="admin">管理者</option>
-        </select>
-
-        <button type="submit">登入</button>
-    </form>
+                    <form method="post" class="needs-validation" novalidate>
+                        <div class="table-responsive mb-0">
+                            <table class="table table-bordered align-middle mb-4 brand-table">
+                                <thead class="table-primary text-center">
+                                    <tr>
+                                        <th colspan="2" class="py-3">登入資料填寫</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th scope="row" class="text-nowrap text-center bg-brand-light">帳號</th>
+                                        <td>
+                                            <input type="text" id="username" name="username" class="form-control" value="<?= htmlspecialchars($values['username']) ?>" required>
+                                            <div class="invalid-feedback">請輸入帳號</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row" class="text-nowrap text-center bg-brand-light">密碼</th>
+                                        <td>
+                                            <input type="password" id="password" name="password" class="form-control" required>
+                                            <div class="invalid-feedback">請輸入密碼</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" class="text-center bg-brand-light">
+                                            <button id="ligin" type="submit" class="btn btn-brand px-5">登入</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// (JS-1) 初始化頁面互動
+$(function () {
+    const form = $("form.needs-validation");
+
+    // (JS-2) 啟動 Bootstrap 驗證流程
+    form.on("submit", function (event) {
+        if (!this.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        $(this).addClass("was-validated");
+    });
+
+    // (JS-3) 聚焦與快捷鍵
+    $("#username").trigger("focus");
+    $("#password").on("keypress", function (event) {
+        if (event.key === "Enter") {
+            form.trigger("submit");
+        }
+    });
+});
+</script>
 </body>
 </html>
