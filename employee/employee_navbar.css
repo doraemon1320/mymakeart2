@@ -1,53 +1,267 @@
-
-.navbar-custom {
-    background-color: #212529;
-    padding: 8px 30px;
+:root {
+    --brand-yellow: #ffcd00;
+    --brand-pink: #e36386;
+    --brand-blue: #345d9d;
+    --brand-blue-dark: #24457a;
 }
 
-.navbar-custom a, .navbar-custom span {
-    color: white;
-    text-decoration: none;
-    margin-right: 18px;
-    font-size: 14px;
+.employee-navbar {
+    background: linear-gradient(120deg, rgba(52, 93, 157, 0.9) 0%, rgba(52, 93, 157, 0.75) 55%, rgba(255, 205, 0, 0.72) 100%);
 }
 
-.navbar-custom a:hover {
-    text-decoration: none;
-	color: #ccc;
+.employee-navbar__surface {
+    background-color: rgba(255, 255, 255, 0.98);
+    border-radius: 16px;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 12px 24px rgba(36, 69, 122, 0.14);
+    border: 1px solid rgba(36, 69, 122, 0.08);
 }
 
-.navbar-custom .admin-btn {
-    color: #ffc107;
-    font-weight: bold;
+.employee-navbar__logo {
+    width: 52px;
+    height: auto;
+    object-fit: contain;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(36, 69, 122, 0.22);
+    background-color: #ffffff;
+    padding: 4px;
 }
 
-.navbar-custom .logout-btn {
-    padding: 4px 10px;
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 13px;
-    text-decoration: none;
+.employee-navbar__title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--brand-blue);
+    line-height: 1.4;
 }
 
-.navbar-custom .logout-btn:hover {
-    background-color: #c82333;
+.employee-navbar__subtitle {
+    font-size: 0.85rem;
+    color: #5f6f8f;
 }
 
-.navbar-custom .nav-left {
+.employee-navbar__user-card {
+    background: linear-gradient(135deg, rgba(255, 205, 0, 0.14), rgba(227, 99, 134, 0.08));
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(36, 69, 122, 0.12);
+    box-shadow: inset 0 0 0 1px rgba(255, 205, 0, 0.18);
+}
+
+.employee-navbar__user-name {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--brand-blue-dark);
+}
+
+.employee-navbar__user-meta-wrap {
     display: flex;
-    align-items: center;
     flex-wrap: wrap;
+    gap: 0.35rem 0.75rem;
+    align-items: center;
 }
 
-.navbar-custom .nav-right {
-    margin-left: auto;
+.employee-navbar__user-meta {
+    font-size: 0.85rem;
+    color: #657498;
+}
+
+.employee-navbar__badge-manager {
+    background-color: var(--brand-pink);
+    color: #ffffff;
+    font-weight: 600;
+    padding: 0.25rem 0.55rem;
+    border-radius: 999px;
+}
+
+.employee-navbar__actions .btn {
+    min-width: 86px;
+}
+
+.btn-brand-primary {
+    background-color: var(--brand-blue);
+    border-color: var(--brand-blue);
+    color: #ffffff;
+    box-shadow: 0 3px 10px rgba(36, 69, 122, 0.25);
+}
+
+.btn-brand-primary:hover,
+.btn-brand-primary:focus {
+    background-color: var(--brand-blue-dark);
+    border-color: var(--brand-blue-dark);
+    color: #ffffff;
+}
+
+.btn-brand-outline {
+    background-color: #ffffff;
+    border: 1px solid var(--brand-blue);
+    color: var(--brand-blue);
+}
+
+.btn-brand-outline:hover,
+.btn-brand-outline:focus {
+    background-color: rgba(52, 93, 157, 0.12);
+    color: var(--brand-blue-dark);
+}
+
+.btn-brand-warning {
+    background-color: var(--brand-yellow);
+    border-color: var(--brand-yellow);
+    color: #3b2f06;
+    box-shadow: 0 4px 12px rgba(255, 205, 0, 0.32);
+}
+
+.btn-brand-warning:hover,
+.btn-brand-warning:focus {
+    background-color: #e6ba00;
+    border-color: #e6ba00;
+    color: #2d2403;
+}
+
+.btn-brand-danger {
+    background-color: var(--brand-pink);
+    border-color: var(--brand-pink);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(227, 99, 134, 0.25);
+}
+
+.btn-brand-danger:hover,
+.btn-brand-danger:focus {
+    background-color: #c94c73;
+    border-color: #c94c73;
+    color: #ffffff;
+}
+
+.employee-navbar__link-outer {
+    padding: 0.35rem 0.5rem;
+    background: rgba(52, 93, 157, 0.04);
+    border-radius: 12px;
+}
+
+.employee-navbar__link-wrap {
+    display: flex;
+    gap: 0.45rem;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(52, 93, 157, 0.3) transparent;
+}
+
+.employee-navbar__link-wrap::-webkit-scrollbar {
+    height: 6px;
+}
+
+.employee-navbar__link-wrap::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.employee-navbar__link-wrap::-webkit-scrollbar-thumb {
+    background: rgba(52, 93, 157, 0.3);
+    border-radius: 999px;
+}
+
+.employee-navbar__link {
+    white-space: nowrap;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding-inline: 0.75rem;
+}
+
+.employee-navbar__scroll-hint {
+    margin-top: 0.15rem;
+    color: #6c7a99 !important;
+}
+
+.employee-navbar__table .table {
+    margin-bottom: 0;
+}
+
+.employee-navbar__table .table-primary {
+    background: linear-gradient(135deg, rgba(52, 93, 157, 0.92), rgba(227, 99, 134, 0.85));
+    color: #ffffff;
+    border-color: var(--brand-blue);
+}
+
+.employee-navbar__table td {
+    vertical-align: middle;
+    font-size: 0.9rem;
+}
+
+.employee-navbar__stat-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+.bg-brand-blue {
+    background-color: var(--brand-blue);
+}
+
+.employee-navbar__quick-tips {
+    background: rgba(52, 93, 157, 0.06);
+    border: 1px solid rgba(52, 93, 157, 0.12);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    display: grid;
+    gap: 0.6rem;
+}
+
+.employee-navbar__tip-item {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 0.6rem;
+    font-size: 0.9rem;
+    color: #3f4d6d;
 }
 
-.navbar-icon {
-    margin-right: 4px;
+.employee-navbar__tip-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    background-color: rgba(255, 205, 0, 0.25);
+    color: var(--brand-blue-dark);
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+@media (max-width: 992px) {
+    .employee-navbar__surface {
+        padding: 0.9rem 1rem;
+    }
+
+    .employee-navbar__logo {
+        width: 48px;
+    }
+
+    .employee-navbar__user-card {
+        text-align: left;
+    }
+}
+
+@media (max-width: 576px) {
+    .employee-navbar__surface {
+        padding: 0.85rem 0.85rem;
+    }
+
+    .employee-navbar__title {
+        font-size: 1.02rem;
+    }
+
+    .employee-navbar__subtitle {
+        font-size: 0.82rem;
+    }
+
+    .employee-navbar__actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .employee-navbar__actions .btn {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
 }
