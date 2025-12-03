@@ -164,7 +164,7 @@ if (!empty($employee_number)) {
                     $default_status[] = $status;
                     $status_class = ($req['type'] === '請假') ? 'leave' : 'overtime';
                     break;
-                }
+                                }
             }
 
             if (!$has_approved) {
@@ -189,14 +189,31 @@ if (!empty($employee_number)) {
                     $rest_seconds = strtotime("$day $break_end_time") - strtotime("$day $break_start_time");
                     $absent_minutes = max(0, floor(($work_seconds - $rest_seconds) / 60));
                 } else {
+                    $late_minutes = 0;
+                    $early_leave_minutes = 0;
+
+                    $is_valid_time = static function ($time) {
+                        return preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $time);
+                    };
+
                     if (strtotime($first_time) > strtotime($shift_start_time)) {
                         $default_status[] = '遲到';
                         $status_class = 'red';
+
+                        if ($is_valid_time($first_time)) {
+                            $late_minutes = max(0, floor((strtotime("$day $first_time") - strtotime("$day $shift_start_time")) / 60));
+                        }
                     }
                     if (strtotime($last_time) < strtotime($shift_end_time)) {
                         $default_status[] = '早退';
                         $status_class = 'red';
+
+                        if ($is_valid_time($last_time)) {
+                            $early_leave_minutes = max(0, floor((strtotime("$day $shift_end_time") - strtotime("$day $last_time")) / 60));
+                        }
                     }
+
+                    $absent_minutes += $late_minutes + $early_leave_minutes;
                 }
             }
         }
