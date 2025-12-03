@@ -287,13 +287,15 @@ function handleLeaveTypeChange(row) {
   const detailMap = leaveLimit[employeeNumber] || {};
   const detail = detailMap[leaveType] || null;
   const baseLimit = Number(leaveBaseLimit[leaveType] ?? 0);
-  const limitDays = Number(detail ? detail.limit : baseLimit);
+  const limitDaysDisplay = Number(detail ? detail.limit_days ?? detail.limit : baseLimit);
+  const limitHoursDisplay = Number(detail ? detail.limit_hours_display ?? 0 : 0);
+  const limitHoursTotal = Number(
+    detail ? detail.limit_hours_total ?? limitDaysDisplay * 8 + limitHoursDisplay : limitDaysDisplay * 8 + limitHoursDisplay,
+  );
   const usedDays = Number(detail ? detail.used_days : 0);
   const usedHours = Number(detail ? detail.used_hours : 0);
-  const remainDays = Number(detail ? detail.remain_days : Math.max(limitDays - usedDays, 0));
-  const remainHours = Number(
-    detail ? detail.remain_hours : Math.max(limitDays * 8 - (usedDays * 8 + usedHours), 0),
-  );
+  const remainHours = Number(detail ? detail.remain_hours : Math.max(limitHoursTotal - (usedDays * 8 + usedHours), 0));
+  const remainDays = detail ? Number(detail.remain_days) : Math.floor(remainHours / 8);
 
   const infoTable = `
     <div class="mb-3 fw-bold">${employeeLabel}</div>
@@ -312,7 +314,7 @@ function handleLeaveTypeChange(row) {
         <tbody>
           <tr>
             <td>${leaveType}</td>
-            <td>${formatNumber(limitDays)}</td>
+            <td>${formatNumber(limitDaysDisplay)}${limitHoursDisplay ? ` 天 ${formatNumber(limitHoursDisplay)} 小時` : ''}</td>
             <td>${formatNumber(usedDays)}</td>
             <td>${formatNumber(usedHours)}</td>
             <td>${formatNumber(remainDays)}</td>
