@@ -48,7 +48,7 @@ function buildShiftSegments(array $shift): array
             if ($breakStart > $start) {
                 $segments[] = [$start, $breakStart];
             }
-            if ($breakEnd < $end) {
+if ($breakEnd < $end) {
                 $segments[] = [$breakEnd, $end];
             }
             if (empty($segments)) {
@@ -71,6 +71,32 @@ function isTimeAllowedByShift(string $time, array $shift): bool
         }
     }
     return false;
+}
+
+// 【PHP-1C】特休剩餘時數計算（依規則：取得 - 使用 - 轉現金，不分年度）
+function fetchAnnualLeaveBalance(mysqli $conn, int $employeeId): array
+{
+    $grant_stmt = $conn->prepare("SELECT COALESCE(SUM(days),0) AS total_days, COALESCE(SUM(hours),0) AS total_hours FROM annual_leave_records WHERE employee_id = ? AND status = '取得'");
+    $grant_stmt->bind_param('i', $employeeId);
+    $grant_stmt->execute();
+    $grant = $grant_stmt->get_result()->fetch_assoc() ?: ['total_days' => 0, 'total_hours' => 0];
+    $grant_stmt->close();
+
+    $used_stmt = $conn->prepare("SELECT COALESCE(SUM(days),0) AS total_days, COALESCE(SUM(hours),0) AS total_hours FROM annual_leave_records WHERE employee_id = ? AND status IN ('使用','轉現金')");
+    $used_stmt->bind_param('i', $employeeId);
+    $used_stmt->execute();
+    $used = $used_stmt->get_result()->fetch_assoc() ?: ['total_days' => 0, 'total_hours' => 0];
+    $used_stmt->close();
+
+    $grantHours = ($grant['total_days'] * 8) + (float)$grant['total_hours'];
+    $usedHours = ($used['total_days'] * 8) + (float)$used['total_hours'];
+    $remainHours = max(0, $grantHours - $usedHours);
+
+    return [
+        'grant_hours' => $grantHours,
+        'used_hours' => $usedHours,
+        'remain_hours' => $remainHours,
+    ];
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -222,7 +248,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $cur_break_end = strtotime("$cur_day $break_end");
 
             $range_start = max($current, $cur_start);
-            $range_end = min($end_ts, $cur_end);
+$range_end = min($end_ts, $cur_end);
 
             if ($range_end > $range_start) {
                 $duration = $range_end - $range_start;
@@ -247,6 +273,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             continue;
         }
 
+        // 【PHP-6A】特休額度檢查：不得超過剩餘可用時數
+        if ($subtype === '特休假') {
+            $balance = fetchAnnualLeaveBalance($conn, $employee_id);
+            if ($leave_hours - $balance['remain_hours'] > 0.0001) {
+                $skipped++;
+                $messages[] = "<div class='alert alert-warning'>第 " . ($i + 1) . " 筆略過：特休剩餘 " . number_format($balance['remain_hours'], 1) . " 小時，不足以抵扣本次申請</div>";
+                continue;
+            }
+        }
+
         // 【PHP-7】寫入 requests
         $stmt = $conn->prepare("INSERT INTO requests (employee_id, employee_number, name, type, subtype, reason, start_date, end_date, status) VALUES (?, ?, ?, '請假', ?, ?, ?, ?, 'Approved')");
         $stmt->bind_param('issssss', $employee_id, $employee_number, $employee_name, $subtype, $reason, $start_dt, $end_dt);
@@ -265,6 +301,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt = $conn->prepare("INSERT INTO annual_leave_records (employee_id, year, month, day, days, status, created_at) VALUES (?, ?, ?, ?, 1, '使用', NOW())");
                     $stmt->bind_param('iiis', $employee_id, $year, $month, $day);
                     $stmt->execute();
+                    $stmt->close();
+                }
+            } else {
+                $year = (int)date('Y', strtotime($start_dt));
+                $stmt = $conn->prepare("INSERT INTO annual_leave_records (employee_id, year, hours, status, created_at) VALUES (?, ?, ?, '使用', NOW())");
+                $stmt->bind_param('iid', $employee_id, $year, $leave_hours);
+                $stmt->execute();
                     $stmt->close();
                 }
             } else {
