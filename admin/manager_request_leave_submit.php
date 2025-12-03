@@ -322,7 +322,7 @@ $range_end = min($end_ts, $cur_end);
         $success++;
         $messages[] = "<div class='alert alert-success'>第 " . ($i + 1) . " 筆成功送出</div>";
     }
-}
+    
 
 // 【PHP-9】呈現結果
 ?>
