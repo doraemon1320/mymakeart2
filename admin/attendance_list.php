@@ -21,17 +21,24 @@ $end_date = date('Y-m-t', strtotime($start_date));
 // 【PHP-03】取得員工清單，若未指定員工則預設為第一筆
 $current_employee_name = '未選擇員工';
 $employee_list = [];
-$employee_result = $conn->query("SELECT employee_number, name FROM employees ORDER BY employee_number");
-if ($employee_result) {
-    $employee_list = $employee_result->fetch_all(MYSQLI_ASSOC);
-    if (empty($employee_number) && !empty($employee_list)) {
-        $employee_number = $employee_list[0]['employee_number'];
-        $current_employee_name = $employee_list[0]['name'];
-    }
-    foreach ($employee_list as $employee) {
-        if ($employee['employee_number'] === $employee_number) {
-            $current_employee_name = $employee['name'];
-            break;
+$employee_stmt = $conn->prepare(
+    "SELECT employee_number, name FROM employees WHERE role = 'employee' AND (resignation_date IS NULL OR resignation_date = '') ORDER BY employee_number"
+);
+
+if ($employee_stmt) {
+    $employee_stmt->execute();
+    $employee_result = $employee_stmt->get_result();
+    if ($employee_result) {
+        $employee_list = $employee_result->fetch_all(MYSQLI_ASSOC);
+        if (empty($employee_number) && !empty($employee_list)) {
+            $employee_number = $employee_list[0]['employee_number'];
+            $current_employee_name = $employee_list[0]['name'];
+        }
+        foreach ($employee_list as $employee) {
+            if ($employee['employee_number'] === $employee_number) {
+                $current_employee_name = $employee['name'];
+                break;
+            }
         }
     }
 }
@@ -57,6 +64,7 @@ if ($holiday_result) {
             'is_working_day' => $row['is_working_day']
         ];
     }
+
 }
 
 // 【PHP-06】請假假別對照表
