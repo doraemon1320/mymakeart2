@@ -11,7 +11,7 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
 // 【PHP-2】年份參數：統一採用當年度資料
 $selected_year = date("Y");
 
-// 【PHP-3】取得假別設定
+// 【PHP-3】取得假別設定（確保特休假存在，用於同步特休額度）
 $leave_types = [];
 $leave_type_limits = [];
 $type_stmt = $conn->query("SELECT id, name, days_per_year FROM leave_types");
@@ -23,9 +23,19 @@ while ($row = $type_stmt->fetch_assoc()) {
     $leave_type_limits[$row['name']] = (int)$row['days_per_year'];
 }
 
-// 【PHP-4】取得有效員工清單
+// 若資料表尚未建立「特休假」設定，仍須顯示特休額度
+$has_annual_leave_type = in_array('特休假', array_column($leave_types, 'name'), true);
+if (!$has_annual_leave_type) {
+    $leave_types[] = [
+        'name' => '特休假',
+        'days_per_year' => 0
+    ];
+    $leave_type_limits['特休假'] = 0;
+}
+
+// 【PHP-4】取得有效員工清單（含主管，僅排除已離職與 admin）
 $employees_data = [];
-$employee_stmt = $conn->query("SELECT id, name, employee_number FROM employees WHERE role = 'employee' AND (resignation_date IS NULL OR resignation_date = '')");
+$employee_stmt = $conn->query("SELECT id, name, employee_number FROM employees WHERE role <> 'admin' AND (resignation_date IS NULL OR resignation_date = '')");
 while ($emp = $employee_stmt->fetch_assoc()) {
     $employees_data[] = $emp;
 }
@@ -87,6 +97,46 @@ $summary_by_employee = [];
 $year_start = new DateTime("$selected_year-01-01 00:00:00");
 $year_end = new DateTime("$selected_year-12-31 23:59:59");
 
+/**
+ * 【PHP-7-A】計算特休額度：依 annual_leave_records 不分年份統計取得/使用/轉現金
+ */
+function calculateAnnualLeaveBalance(mysqli $conn, int $employee_id): array
+{
+    $stmtGrant = $conn->prepare("SELECT COALESCE(SUM(days),0) AS total_days, COALESCE(SUM(hours),0) AS total_hours FROM annual_leave_records WHERE employee_id = ? AND status = '取得'");
+    $stmtGrant->bind_param("i", $employee_id);
+    $stmtGrant->execute();
+    $grant = $stmtGrant->get_result()->fetch_assoc();
+
+    $stmtUsed = $conn->prepare("SELECT COALESCE(SUM(days),0) AS total_days, COALESCE(SUM(hours),0) AS total_hours FROM annual_leave_records WHERE employee_id = ? AND status IN ('使用','轉現金')");
+    $stmtUsed->bind_param("i", $employee_id);
+    $stmtUsed->execute();
+    $used = $stmtUsed->get_result()->fetch_assoc();
+
+    $grant_hours_total = floatval($grant['total_days']) * 8 + floatval($grant['total_hours']);
+    $used_hours_total = floatval($used['total_days']) * 8 + floatval($used['total_hours']);
+
+    $remain_hours_total = max(0, $grant_hours_total - $used_hours_total);
+    $remain_days = (int)floor($remain_hours_total / 8);
+    $remain_hours = round($remain_hours_total - ($remain_days * 8), 1);
+
+    $grant_days_display = (int)floor($grant_hours_total / 8);
+    $grant_hours_display = round($grant_hours_total - ($grant_days_display * 8), 1);
+
+    $used_days_display = (int)floor($used_hours_total / 8);
+    $used_hours_display = round($used_hours_total - ($used_days_display * 8), 1);
+
+    return [
+        'limit' => round($grant_hours_total / 8, 2),
+        'limit_days' => $grant_days_display,
+        'limit_hours_display' => $grant_hours_display,
+        'limit_hours_total' => round($grant_hours_total, 1),
+        'used_days' => $used_days_display,
+        'used_hours' => $used_hours_display,
+        'remain_days' => $remain_days,
+        'remain_hours' => $remain_hours,
+    ];
+}
+
 foreach ($employees_data as $emp) {
     $employee_id = $emp['id'];
     $employee_number = $emp['employee_number'];
@@ -104,42 +154,8 @@ foreach ($employees_data as $emp) {
 
         // 【PHP-7-1】特休假採用 annual_leave_records 統計（含取得時數）
         if ($leave_name === '特休假') {
-            $usage_stmt = $conn->prepare("SELECT SUM(days) AS total_days, SUM(hours) AS total_hours FROM annual_leave_records WHERE employee_id = ? AND status IN ('使用','轉現金')");
-            $usage_stmt->bind_param("i", $employee_id);
-            $usage_stmt->execute();
-            $usage = $usage_stmt->get_result()->fetch_assoc();
-
-            $used_days_raw = intval($usage['total_days'] ?? 0);
-            $used_hours_raw = floatval($usage['total_hours'] ?? 0);
-            $used_total_hours = $used_days_raw * 8 + $used_hours_raw;
-            $used_days = floor($used_total_hours / 8);
-            $used_hours = round($used_total_hours - ($used_days * 8), 1);
-
-            $grant_stmt = $conn->prepare("SELECT SUM(days) AS total_grant_days, SUM(hours) AS total_grant_hours FROM annual_leave_records WHERE employee_id = ? AND status = '取得'");
-            $grant_stmt->bind_param("i", $employee_id);
-            $grant_stmt->execute();
-            $grant = $grant_stmt->get_result()->fetch_assoc();
-
-            $grant_days_raw = floatval($grant['total_grant_days'] ?? 0);
-            $grant_hours_raw = floatval($grant['total_grant_hours'] ?? 0);
-            $grant_total_hours = $grant_days_raw * 8 + $grant_hours_raw;
-            $limit_days_display = floor($grant_total_hours / 8);
-            $limit_hours_display = round($grant_total_hours - ($limit_days_display * 8), 1);
-
-            $remain_total_hours = max(0, $grant_total_hours - $used_total_hours);
-            $remain_days = floor($remain_total_hours / 8);
-            $remain_hours = round($remain_total_hours - ($remain_days * 8), 1);
-
-            $summary_by_employee[$employee_number]['特休假'] = [
-                'limit' => $limit_days_display + ($limit_hours_display > 0 ? $limit_hours_display / 8 : 0),
-                'limit_days' => $limit_days_display,
-                'limit_hours_display' => $limit_hours_display,
-                'limit_hours_total' => round($grant_total_hours, 1),
-                'used_days' => $used_days,
-                'used_hours' => $used_hours,
-                'remain_days' => $remain_days,
-                'remain_hours' => $remain_hours,
-            ];
+            $annual_balance = calculateAnnualLeaveBalance($conn, $employee_id);
+            $summary_by_employee[$employee_number]['特休假'] = $annual_balance;
             continue;
         }
 
