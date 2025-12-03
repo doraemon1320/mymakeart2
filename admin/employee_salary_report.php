@@ -19,8 +19,7 @@ $last_year = date('Y', strtotime('first day of last month'));
 $year = isset($_GET['year']) ? (int)$_GET['year'] : (int)$last_year;
 $month = isset($_GET['month']) ? (int)$_GET['month'] : (int)$last_month;
 
-$active_condition = "((employment_status IS NULL OR employment_status = '' OR employment_status NOT IN ('離職','已離職','Resigned','Terminated'))"
-    . " AND (resignation_date IS NULL OR resignation_date = '' OR resignation_date = '0000-00-00' OR resignation_date > CURDATE()))";
+$active_condition = "role = 'employee' AND (resignation_date IS NULL OR resignation_date = '' OR resignation_date = '0000-00-00')";
 $employee_sql = "SELECT id, employee_number, name, hire_date FROM employees WHERE {$active_condition} ORDER BY id ASC";
 $employee_list = $conn->query($employee_sql)->fetch_all(MYSQLI_ASSOC);
 $employee_id = isset($_GET['employee_id']) ? (int)$_GET['employee_id'] : 0;
