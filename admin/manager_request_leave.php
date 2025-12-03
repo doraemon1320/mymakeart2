@@ -102,7 +102,7 @@ foreach ($employees_data as $emp) {
     foreach ($leave_types as $type_data) {
         $leave_name = $type_data['name'];
 
-        // 【PHP-7-1】特休假採用 annual_leave_records 統計
+        // 【PHP-7-1】特休假採用 annual_leave_records 統計（含取得時數）
         if ($leave_name === '特休假') {
             $usage_stmt = $conn->prepare("SELECT SUM(days) AS total_days, SUM(hours) AS total_hours FROM annual_leave_records WHERE employee_id = ? AND status IN ('使用','轉現金')");
             $usage_stmt->bind_param("i", $employee_id);
@@ -115,18 +115,26 @@ foreach ($employees_data as $emp) {
             $used_days = floor($used_total_hours / 8);
             $used_hours = round($used_total_hours - ($used_days * 8), 1);
 
-            $grant_stmt = $conn->prepare("SELECT SUM(days) AS total_grant FROM annual_leave_records WHERE employee_id = ? AND status = '取得'");
+            $grant_stmt = $conn->prepare("SELECT SUM(days) AS total_grant_days, SUM(hours) AS total_grant_hours FROM annual_leave_records WHERE employee_id = ? AND status = '取得'");
             $grant_stmt->bind_param("i", $employee_id);
             $grant_stmt->execute();
             $grant = $grant_stmt->get_result()->fetch_assoc();
-            $annual_limit = intval($grant['total_grant'] ?? 0);
 
-            $remain_total_hours = max(0, $annual_limit * 8 - $used_total_hours);
+            $grant_days_raw = floatval($grant['total_grant_days'] ?? 0);
+            $grant_hours_raw = floatval($grant['total_grant_hours'] ?? 0);
+            $grant_total_hours = $grant_days_raw * 8 + $grant_hours_raw;
+            $limit_days_display = floor($grant_total_hours / 8);
+            $limit_hours_display = round($grant_total_hours - ($limit_days_display * 8), 1);
+
+            $remain_total_hours = max(0, $grant_total_hours - $used_total_hours);
             $remain_days = floor($remain_total_hours / 8);
             $remain_hours = round($remain_total_hours - ($remain_days * 8), 1);
 
             $summary_by_employee[$employee_number]['特休假'] = [
-                'limit' => $annual_limit,
+                'limit' => $limit_days_display + ($limit_hours_display > 0 ? $limit_hours_display / 8 : 0),
+                'limit_days' => $limit_days_display,
+                'limit_hours_display' => $limit_hours_display,
+                'limit_hours_total' => round($grant_total_hours, 1),
                 'used_days' => $used_days,
                 'used_hours' => $used_hours,
                 'remain_days' => $remain_days,
